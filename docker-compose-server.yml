@@ -43,7 +43,7 @@ services:
     network_mode: host
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}/udp"
-    command: ./udp2raw_amd64 -s -l 0.0.0.0:51825 -r 10.5.0.4:4444 --raw-mode icmp -k "${PASSWORD}" -a
+    command: ./udp2raw_amd64 -s -l 0.0.0.0:${SERVER_PORT} -r 10.5.0.4:4444 --raw-mode icmp -k "${PASSWORD}" -a
   udp-speeder:
     env_file:
       - ./.env
