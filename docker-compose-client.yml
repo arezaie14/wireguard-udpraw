@@ -29,7 +29,7 @@ services:
     networks:
       wireguard:
         ipv4_address: ${UDP_SPEEDER_IP}
-    command: ./speederv2_amd64 -c -l0.0.0.0:4444 -r 10.5.0.3:4444  -f20:10 -k "${PASSWORD}"
+    command: ./speederv2_amd64 -c -l0.0.0.0:4444 -r ${UDP_RAW_IP}:4444  -f20:10 -k "${PASSWORD}"
 networks:
   wireguard:
     driver: bridge
