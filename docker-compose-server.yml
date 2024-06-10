@@ -1,0 +1,67 @@
+version: "2.1"
+services:
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE 
+    env_file:
+      - ./.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SERVERURL=${CLIENT_ADDRESS}
+      - SERVERPORT=${SERVER_PORT}
+      - PEERS=100 
+      - PEERDNS=auto 
+      - INTERNAL_SUBNET=10.13.13.0 
+      - ALLOWEDIPS=0.0.0.0/0 
+      - PERSISTENTKEEPALIVE_PEERS=all
+      - LOG_CONFS=true
+    volumes:
+      - ./config:/config
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+    networks:
+      wireguard:
+        ipv4_address: ${WG_IP}
+  udpraw:
+    env_file:
+      - ./.env
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE 
+    depends_on:
+      - wireguard
+    build: .
+    image: udp-speeder
+    restart: always
+    privileged: true
+    network_mode: host
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}/udp"
+    command: ./udp2raw_amd64 -s -l 0.0.0.0:51825 -r 10.5.0.4:4444 --raw-mode icmp -k "${PASSWORD}" -a
+  udp-speeder:
+    env_file:
+      - ./.env
+    depends_on:
+      - udpraw
+    build: .
+    image: udp-speeder
+    restart: always
+    expose:
+      - "4444/udp"
+    networks:
+      wireguard:
+        ipv4_address: ${UDP_SPEEDER_IP}
+    command: ./speederv2_amd64 -s -l 0.0.0.0:4444 -r 10.5.0.2:51820  -f20:10 -k "${PASSWORD}"
+networks:
+  wireguard:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: ${SUBNET}/16
+         gateway: ${GATEWAY}
