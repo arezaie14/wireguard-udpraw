@@ -24,7 +24,7 @@ services:
       - ./config:/config
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
-    restart: unless-stopped
+    restart: always
     networks:
       wireguard:
         ipv4_address: ${WG_IP}
