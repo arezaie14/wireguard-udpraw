@@ -37,8 +37,6 @@ services:
     depends_on:
       - wireguard
     build: .
-    ports:
-      - ${SERVER_PORT}:${SERVER_PORT}/udp
     image: udp-speeder
     restart: always
     privileged: true
